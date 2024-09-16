@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claim Points</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Header style */
+        .header {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            background-color: #1E90FF;
+            padding: 20px;
+            font-size: 36px;
+            font-weight: bold;
+            color: black;
+            text-align: center;
+        }
+
+        /* $ONION style, placed in the bottom-right corner of the ONION header */
+        .total-points {
+            position: absolute;
+            bottom: 5px;
+            right: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: yellow;
+        }
+
+        .profile {
+            font-size: 40px;
+            font-weight: bold;
+            color: #1E90FF;
+            background-color: white;
+            border-radius: 50%;
+            height: 80px;
+            width: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .username {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .onion {
+            margin: 20px 0;
+        }
+
+        .onion img {
+            height: 50px;
+            width: 50px;
+        }
+
+        .points {
+            font-size: 48px;
+            font-weight: bold;
+        }
+
+        .claim-button {
+            margin-top: 20px;
+            background-color: yellow;
+            color: black;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px 40px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .claim-button:active {
+            background-color: darkorange;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            background-color: #222;
+            padding: 10px 0;
+        }
+
+        .footer div {
+            color: white;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header section -->
+    <div class="header">
+        ONION
+        <!-- Total onions in bottom-right corner of header -->
+        <div class="total-points" id="total-points">$ONION: 0</div>
+    </div>
+
+    <!-- Container with profile info -->
+    <div class="container">
+        <div class="profile" id="profile-logo">1</div>
+        <div class="username" id="username">16092311</div>
+        <div class="onion">
+            <!-- Updated onion image -->
+            <img src="https://cdn-icons-png.flaticon.com/512/4242/4242491.png" alt="Onion Logo">
+        </div>
+        <div class="points" id="points">0</div>
+        <button class="claim-button" id="claim-button" onclick="claimPoints()">CLAIM $ONION</button>
+    </div>
+
+    <div class="footer">
+        <div>Home</div>
+        <div>Earn</div>
+        <div>Frens</div>
+        <div>Wallet</div>
+    </div>
+
+    <script>
+        // Function to generate a unique username
+        function generateUniqueUsername() {
+            const now = new Date();
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
+            return `${dd}${mm}${hh}${min}${ss}`;
+        }
+
+        // Generate username on every load based on time
+        const uniqueUsername = generateUniqueUsername();
+
+        // Function to initialize user profile
+        function initializeUser() {
+            const firstLetter = uniqueUsername.charAt(0).toUpperCase();
+            document.getElementById('profile-logo').textContent = getLevelFromPoints(totalPoints);
+            document.getElementById('username').textContent = uniqueUsername;
+            checkClaimAvailability();
+        }
+
+        function getLevelFromPoints(points) {
+            if (points >= 50000) return '5';
+            if (points >= 10000) return '4';
+            if (points >= 5000) return '3';
+            if (points >= 1000) return '2';
+            return '1';
+        }
+
+        let points = 0;
+        let totalPoints = parseInt(localStorage.getItem("totalPoints")) || 0; // Total points stored in localStorage
+
+        // Function to handle the claim button
+        function claimPoints() {
+            const lastClaimDate = localStorage.getItem("lastClaimDate");
+            const today = new Date().toDateString();
+
+            if (lastClaimDate === today) {
+                alert("You have already claimed your onions today. Come back tomorrow!");
+                return;
+            }
+
+            // Increment points
+            points += 100;
+            totalPoints = totalPoints + 100; // Update total points
+            document.getElementById("points").textContent = points;
+            document.getElementById("total-points").textContent = "$ONION: " + totalPoints;
+
+            // Update profile level based on new total points
+            document.getElementById("profile-logo").textContent = getLevelFromPoints(totalPoints);
+
+            // Store today's date as the last claim date
+            localStorage.setItem("lastClaimDate", today);
+            localStorage.setItem("totalPoints", totalPoints); // Save total points
+
+            // Disable the claim button for today
+            document.getElementById("claim-button").disabled = true;
+            document.getElementById("claim-button").textContent = "Claimed!";
+        }
+
+        // Function to check if the user can claim today
+        function checkClaimAvailability() {
+            const lastClaimDate = localStorage.getItem("lastClaimDate");
+            const today = new Date().toDateString();
+
+            if (lastClaimDate === today) {
+                document.getElementById("claim-button").disabled = true;
+                document.getElementById("claim-button").textContent = "Claimed!";
+            }
+
+            // Display total points and profile level on page load
+            document.getElementById("total-points").textContent = "$ONION: " + totalPoints;
+            document.getElementById("profile-logo").textContent = getLevelFromPoints(totalPoints);
+        }
+
+        // Initialize the user profile on page load
+        window.onload = initializeUser;
+    </script>
+
+</body>
+</html>
